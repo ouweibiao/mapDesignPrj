@@ -1,6 +1,9 @@
 <!--UI骨架组件-->
 <script setup>
 import Map from './Map.vue'
+import Lineplot from "@/components/DataDisplay/Lineplot.vue";
+import BaiduMap from "@/App.vue";
+import TestMap from "@/components/TestMap.vue";
 
 </script>
 
@@ -41,12 +44,19 @@ import Map from './Map.vue'
           <a-breadcrumb-item>User</a-breadcrumb-item>
           <a-breadcrumb-item>Bill</a-breadcrumb-item>
         </a-breadcrumb>!-->
-        <div id="map" style="width: 1161.08px; height: 556px ">
-            <!--把地图渲染到这里面来-->
+        <div>
+          <Map/>
+          <!--把地图渲染到这里面来-->
+        </div>
+        <div>
+
+
+          <!--这里放数据图-->
         </div>
       </a-layout-content>
       <a-layout-content>
         <div>
+
           <!--此处用于存放简单的数据结果-->
         </div>
       </a-layout-content>
