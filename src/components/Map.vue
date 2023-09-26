@@ -34,10 +34,23 @@ let map;
 const lineCoordinates = road;//道路对象
 
 
+var UrlArr= [
+  'https://s2.loli.net/2023/09/26/pbHTWUrw8zJVDMO.png',
+  'https://s2.loli.net/2023/09/26/mp6gYjsF3IDaWch.png',
+  'https://s2.loli.net/2023/09/26/YdcU1D2lPsM5rjT.png',
+  'https://s2.loli.net/2023/09/26/haiGdRypum6xsDc.png',
+  'https://s2.loli.net/2023/09/26/9zHiAGMIUmN8hO5.png',
+  'https://s2.loli.net/2023/09/26/q5jpiIk7dGMuPwY.png',
+  'https://s2.loli.net/2023/09/26/E5cyxzrwCoplkTs.png',
+  'https://s2.loli.net/2023/09/26/tr7zham9TKC8GIg.png',
+  'https://s2.loli.net/2023/09/26/Qbr7ygqA1D4dYTs.png'
+]
+
 //更新位置
 const updatePosition = (data) => {
   position.value = [];
   data.forEach(element => {
+    // print("element=",element)
     position.value.push({
       'type': 'Feature',
       'properties': {
@@ -88,6 +101,37 @@ const createMap = () => {
         },
       });
     });
+
+    var data_total = change();
+    //添加一个标注点，light[4]
+    console.log("标注点所在位置=",light[12]);
+    const marker = new mapboxgl.Marker()
+        .setLngLat(light[4])
+        .addTo(map);
+    //先加载第0秒的交通灯状态展示在地图上
+    for (var i = 0; i < light.length; i++) {
+      //每个交通灯新建一个图层
+      var sourceid = 'radar' + i;
+      var layerid = 'radar-layer' + i;
+      //为每个交通灯的图片展示添加数据源，以sourceid为该源的id
+      map.addSource(sourceid, {
+        'type': 'image',
+        'url': UrlArr[time1[1][i]],
+        // 'url':'../images/2左转.jpeg',
+        'coordinates': data_total[i]
+      });
+      //利用上述的数据源，新增一个图层
+      map.addLayer({
+        id: layerid,
+        'type': 'raster',
+        'source': sourceid,
+        'paint': {
+          'raster-fade-duration': 0
+        }
+      });
+    }
+
+
   });
   map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }));
   // 增加交通灯图层并更新
@@ -224,11 +268,14 @@ const drawTrace = () => {
   });
 };
 
+
+//按下开始键后执行
 const startUpdating = () => {
   if (!intervalId) {
     intervalId = setInterval(() => {
       currentIndex.value = (currentIndex.value + 1);
       import(`../store/vehicle/vehicle${currentIndex.value}.json`).then(data => {
+        console.log(`vehicle${currentIndex.value}.json=`, data.default);
         updatePosition(data.default);
         if (clickFlag) {
           pointColor.value = ('#778899');
@@ -239,10 +286,17 @@ const startUpdating = () => {
           updateMap();
         }
       });
-      /*if (currentIndex.value >= 50) {
-        clearInterval(intervalId);
-        intervalId = null;
-      }*/
+
+
+      //交通灯的变化
+      import(`../store/log/time${currentIndex.value}.json`).then(data => {
+        console.log(`time${currentIndex.value}.json=`,data.default);
+        for (var i = 0; i < light.length; i++) {
+          var sourceid = 'radar' + i;
+          //更新图像地址url，(可选更新位置coordinates),网址 https://docs.mapbox.com/mapbox-gl-js/api/sources/#imagesource#updateimage
+          map.getSource(sourceid).updateImage({ url: UrlArr[data.default[1][i]]});
+        }
+      });
     }, updateInterval);
   }
 };
@@ -271,77 +325,12 @@ onMounted(() => {
   createMap();
 
 
-
-  //存储照片URL的数组
-  var UrlArr = ['https://s2.loli.net/2023/09/05/o7jfui26X1ND4Ga.png',
-    'https://s2.loli.net/2023/09/05/n4tB5xXMzgecL7S.png',
-    'https://s2.loli.net/2023/09/05/2vM9Jz8huPRwNjF.png',
-    'https://s2.loli.net/2023/09/05/ixZ7uIEOzj1BJgr.png',
-    'https://s2.loli.net/2023/09/05/eN6w5JUkPDd1qEO.png',
-    'https://s2.loli.net/2023/09/05/sfGPgymTbSALYz5.png',
-    'https://s2.loli.net/2023/09/05/kj2oyMHn1YpuKCr.png',
-    'https://s2.loli.net/2023/09/05/qHahvDXzZtLpBGV.png',
-    'https://s2.loli.net/2023/09/05/EbdfUct1zyMQeWr.png'];
-
   var data_total = change();
   // var map = Init_Map();
   map.on('load', () => {//当地图加载后执行
-    //先加载第0秒的交通灯状态展示在地图上
-    for (var i = 0; i < light.length; i++) {
-      //每个交通灯新建一个图层
-      var sourceid = 'radar' + i;
-      var layerid = 'radar-layer' + i;
-      //为每个交通灯的图片展示添加数据源，以sourceid为该源的id
-      map.addSource(sourceid, {
-        'type': 'image',
-        'url': UrlArr[time1[1][i]],
-        // 'url':'../images/2左转.jpeg',
-        'coordinates': data_total[i]
-      });
-      //利用上述的数据源，新增一个图层
-      map.addLayer({
-        id: layerid,
-        'type': 'raster',
-        'source': sourceid,
-        'paint': {
-          'raster-fade-duration': 0
-        }
-      });
 
-    }
 
-    var timecount = 1;//记录当前秒数，用于文件读取的文件名
-    setInterval(() => {//每隔一秒，读取一个文件,然后更新图层
-      var fileName = '../store/log/time' + timecount + '.json';
-      timecount++;
-      import(fileName)
-          .then((module) => {//module.default是每个文件中数据
-            for (var i = 0; i < light.length; i++) {
-              var sourceid = 'radar' + i;
-              //更新图像地址url，(可选更新位置coordinates),网址 https://docs.mapbox.com/mapbox-gl-js/api/sources/#imagesource#updateimage
-              map.getSource(sourceid).updateImage({ url: UrlArr[module.default[1][i]], });
-            }
-          })
-          .catch((error) => {
-            console.error(`Failed to import new file${fileName}:`, error);
-          });
-    }, 1000);
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   map.on('mouseenter', 'places', (e) => {

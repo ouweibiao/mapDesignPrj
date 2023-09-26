@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 图表容器 -->
-    <div ref="chart" style="width: 200px; height: 200px; padding-left: 60px"></div>
+    <div ref="chart" style="width: 200px; height: 200px; "></div>
   </div>
 </template>
 
