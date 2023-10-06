@@ -361,6 +361,7 @@ onMounted(() => {
 #map {
   width: 100%;
   height: 500px;
+  //display: none !important;
 }
 </style>
 
