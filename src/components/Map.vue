@@ -629,6 +629,7 @@ onMounted(() => {
 
   width: 39%;
   height: 500px;
+  //display: none !important;
 }
 </style>
 
